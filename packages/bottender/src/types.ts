@@ -133,7 +133,7 @@ type ChannelCommonConfig = {
   enabled: boolean;
   path?: string;
   sync?: boolean;
-  OnRequest?: OnRequest;
+  onRequest?: OnRequest;
 };
 
 export type BottenderConfig = {

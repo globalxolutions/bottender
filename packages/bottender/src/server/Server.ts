@@ -90,22 +90,30 @@ class Server {
 
     const channelBots = Object.entries(channels || {})
       .filter(([, { enabled }]) => enabled)
-      .map(([channel, { path: webhookPath, ...channelConfig }]) => {
-        // eslint-disable-next-line import/no-dynamic-require
-        const ChannelBot = require(`../${channel}/${pascalcase(channel)}Bot`)
-          .default;
-        const channelBot = new ChannelBot({
-          ...channelConfig,
-          sessionStore,
-        }) as Bot<any, any, any, any>;
+      .map(
+        ([
+          channel,
+          { path: webhookPath, sync, onRequest, ...connectorConfig },
+        ]) => {
+          // eslint-disable-next-line import/no-dynamic-require
+          const ChannelConnector = require(`../${channel}/${pascalcase(
+            channel
+          )}Connector`).default;
+          const channelBot = new Bot({
+            sessionStore,
+            sync,
+            onRequest,
+            connector: new ChannelConnector(connectorConfig),
+          }) as Bot<any, any, any, any>;
 
-        initializeBot(channelBot);
+          initializeBot(channelBot);
 
-        return {
-          webhookPath: webhookPath || `/webhooks/${channel}`,
-          bot: channelBot,
-        };
-      });
+          return {
+            webhookPath: webhookPath || `/webhooks/${channel}`,
+            bot: channelBot,
+          };
+        }
+      );
 
     this._channelBots = channelBots;
   }
